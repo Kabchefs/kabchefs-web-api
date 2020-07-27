@@ -16,16 +16,23 @@ exports.signup = async(req, res, next) => {
     try {
         const { email, password, role } = req.body
         const hashedPassword = await hashPassword(password);
-        const newUser = new User({ email, password: hashedPassword, role: role || "basic" });
+        const newUser = new User({ email, password: hashedPassword, role: role || "public" });
+
         const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-            expiresIn: "1d"
+            expiresIn: "1800s"
         });
+        //jwt.sign creates the JsonWebToken as string and return it
+        //jwt.sign function takes the payload, secret and options as its arguments. 
+        //The payload can be used to find out which user is the owner of the token.
+        // Options can have an expire time until which token is valid. The generated token will be a string.
         newUser.accessToken = accessToken;
         await newUser.save();
         res.json({
-            data: newUser,
-            accessToken
-        })
+                data: newUser,
+                accessToken
+            })
+            //res.json() Sends a JSON response composed of the specified data When an object or array is passed to it, this method is identical to res.send()
+            //This method is terminal, meaning that it is generally the last line of code your app should run for a given request (hence the advisory usage of return throughout these docs).
     } catch (error) {
         next(error)
     }
@@ -40,7 +47,7 @@ exports.login = async(req, res, next) => {
         const validPassword = await validatePassword(password, user.password);
         if (!validPassword) return next(new Error('Password is not correct'))
         const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "1d"
+            expiresIn: "1800s"
         });
         await User.findByIdAndUpdate(user._id, { accessToken })
         res.status(200).json({
@@ -102,20 +109,39 @@ exports.deleteUser = async(req, res, next) => {
 }
 
 exports.grantAccess = function(action, resource) {
-    return async(req, res, next) => {
-        try {
-            const permission = roles.can(req.user.role)[action](resource);
-            if (!permission.granted) {
-                return res.status(401).json({
-                    error: "You don't have enough permission to perform this action"
-                });
+        return async(req, res, next) => {
+            try {
+                const permission = roles.can(req.user.role)[action](resource);
+                if (!permission.granted) {
+                    return res.status(401).json({
+                        error: "You don't have enough permission to perform this action"
+                    });
+                }
+                next()
+            } catch (error) {
+                next(error)
             }
-            next()
-        } catch (error) {
-            next(error)
         }
     }
-}
+    // to understand the above functionality
+    //const ac = new AccessControl();
+    //       ac.grant('user')                    // define new or modify existing role. also takes an array.
+    //           .createOwn('video')             // equivalent to .createOwn('video', ['*'])
+    //           .deleteOwn('video')
+    //           .readAny('video')
+
+//           .grant('admin')                   // switch to another role without breaking the chain
+//              .extend('user')                 // inherit role capabilities. also takes an array
+//              .updateAny('video', ['title'])  // explicitly defined attributes
+//              .deleteAny('video');
+
+// const permission = ac.can('user').createOwn('video');
+// console.log(permission.granted);    // —> true
+// console.log(permission.attributes); // —> ['*'] (all attributes)
+
+// permission = ac.can('admin').updateAny('video');
+// console.log(permission.granted);    // —> true
+// console.log(permission.attributes); // —> ['title']
 
 exports.allowIfLoggedin = async(req, res, next) => {
     try {

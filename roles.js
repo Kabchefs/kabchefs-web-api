@@ -4,26 +4,22 @@ const ac = new AccessControl();
 
 exports.roles = (function() {
     ac.grant("public")
-        .readOwn("profile")
         .readAny("article")
 
     ac.grant("teamMember")
-        .extend("public")
-        .readAny("profile")
+        .readOwn("profile")
+        .createOwn('profile')
         .updateOwn("profile")
         .updateAny("article")
-        .createOwn("profile")
-        .createAny("article")
-
-    ac.grant("admin")
-        .updateAny("profile")
-        .deleteAny("profile")
-        .createAny("profile")
-        .readAny("profile")
-        .updateAny("article")
-        .deleteAny("article")
         .createAny("article")
         .readAny("article")
+        .deleteAny('article')
+    ac.grant("admin")
+        .extend('teamMember')
+        .readAny("profile")
+        .createAny('profile')
+        .updateAny("profile")
+        .deleteAny('profile')
 
     return ac;
 })();
