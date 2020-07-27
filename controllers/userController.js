@@ -14,6 +14,8 @@ async function validatePassword(plainPassword, hashedPassword) {
 
 exports.signup = async(req, res, next) => {
     try {
+        const current_role = res.locals.loggedInUser.role;
+        if (current_role !== 'admin') return next(new Error('you cant sign up because you are not admin'));
         const { email, password, role } = req.body
         const hashedPassword = await hashPassword(password);
         const newUser = new User({ email, password: hashedPassword, role: role || "public" });
@@ -46,6 +48,7 @@ exports.login = async(req, res, next) => {
         if (!user) return next(new Error('Email does not exist'));
         const validPassword = await validatePassword(password, user.password);
         if (!validPassword) return next(new Error('Password is not correct'))
+        if (user.role === 'public') return next(new Error('You cant login you are not team Member or admin'));
         const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1800s"
         });
