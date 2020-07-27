@@ -1,3 +1,4 @@
+require('dotenv').config();
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -16,7 +17,7 @@ exports.signup = async(req, res, next) => {
         const { email, password, role } = req.body
         const hashedPassword = await hashPassword(password);
         const newUser = new User({ email, password: hashedPassword, role: role || "basic" });
-        const accessToken = jwt.sign({ userId: newUser._id }, "qwertyuiop12345", {
+        const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
             expiresIn: "1d"
         });
         newUser.accessToken = accessToken;
@@ -38,7 +39,7 @@ exports.login = async(req, res, next) => {
         if (!user) return next(new Error('Email does not exist'));
         const validPassword = await validatePassword(password, user.password);
         if (!validPassword) return next(new Error('Password is not correct'))
-        const accessToken = jwt.sign({ userId: user._id }, "qwertyuiop12345", {
+        const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1d"
         });
         await User.findByIdAndUpdate(user._id, { accessToken })
