@@ -4,18 +4,39 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { roles } = require('../roles')
 
+// async function hashPassword(password) {
+//     return await bcrypt.hash(password, 10, (err, hashedPassword) => {
+//         if (!err) {
+//             return hashedPassword;
+//         }
+//     });
+// }
+
 async function hashPassword(password) {
-    return await bcrypt.hash(password, 10);
+    const hashedPassword = await new Promise((resolve, reject) => {
+        bcrypt.hash(password, 10, function(err, hash) {
+            if (err) reject(err)
+            resolve(hash)
+        });
+    })
+
+    return hashedPassword
 }
 
-async function validatePassword(plainPassword, hashedPassword) {
-    return await bcrypt.compare(plainPassword, hashedPassword);
+
+function validatePassword(plainPassword, hashedPassword) {
+
+    return bcrypt.compare(plainPassword, hashedPassword, (err, match) => {
+        // console.log(match);
+        return match
+    });
 }
 
 exports.signup = async(req, res, next) => {
     try {
-        const current_role = res.locals.loggedInUser.role;
-        if (current_role !== 'admin') return next(new Error('you cant sign up because you are not admin'));
+        // const current_role = res.locals.loggedInUser.role;
+        // if (current_role !== 'admin') return next(new Error('you cant sign up because you are not admin'));
+
         const { email, password, role } = req.body
         const hashedPassword = await hashPassword(password);
         const newUser = new User({ email, password: hashedPassword, role: role || "public" });
@@ -23,7 +44,7 @@ exports.signup = async(req, res, next) => {
         const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
             expiresIn: "1800s"
         });
-        //jwt.sign creates the JsonWebToken as string and return it
+        //jwt.sign creates the JsonWebToken as a string and return it
         //jwt.sign function takes the payload, secret and options as its arguments. 
         //The payload can be used to find out which user is the owner of the token.
         // Options can have an expire time until which token is valid. The generated token will be a string.
@@ -31,7 +52,8 @@ exports.signup = async(req, res, next) => {
         await newUser.save();
         res.json({
                 data: newUser,
-                accessToken
+                accessToken,
+                message: "user is successfully signed up"
             })
             //res.json() Sends a JSON response composed of the specified data When an object or array is passed to it, this method is identical to res.send()
             //This method is terminal, meaning that it is generally the last line of code your app should run for a given request (hence the advisory usage of return throughout these docs).
@@ -46,8 +68,9 @@ exports.login = async(req, res, next) => {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) return next(new Error('Email does not exist'));
-        const validPassword = await validatePassword(password, user.password);
-        if (!validPassword) return next(new Error('Password is not correct'))
+        const validPassword = validatePassword(password, user.password);
+        // console.log(validPassword);
+        if (validPassword === false) return next(new Error('Password is not correct'))
         if (user.role === 'public') return next(new Error('You cant login you are not team Member or admin'));
         const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1800s"
@@ -114,7 +137,9 @@ exports.deleteUser = async(req, res, next) => {
 exports.grantAccess = function(action, resource) {
         return async(req, res, next) => {
             try {
-                const permission = roles.can(req.user.role)[action](resource);
+                // console.log(res.locals);
+                // console.log(req.body);
+                const permission = roles.can(req.body.role)[action](resource);
                 if (!permission.granted) {
                     return res.status(401).json({
                         error: "You don't have enough permission to perform this action"

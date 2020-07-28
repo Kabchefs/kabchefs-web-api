@@ -15,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 mongoose
-    .connect('mongodb://localhost:27017/kabchefSignin', { useUnifiedTopology: true, useNewUrlParser: true })
+    .connect('mongodb://localhost:27017/kabchefSignin', { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false })
     .then(() => {
         console.log('Connected to the Database successfully');
     });
