@@ -1,16 +1,10 @@
 require('dotenv').config();
-const User = require('../models/userModel');
+const User = require('../models/modal_schema');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { roles } = require('../roles')
 
-// async function hashPassword(password) {
-//     return await bcrypt.hash(password, 10, (err, hashedPassword) => {
-//         if (!err) {
-//             return hashedPassword;
-//         }
-//     });
-// }
+
 
 async function hashPassword(password) {
     const hashedPassword = await new Promise((resolve, reject) => {
@@ -39,7 +33,7 @@ exports.signup = async(req, res, next) => {
 
         const { email, password, role } = req.body
         const hashedPassword = await hashPassword(password);
-        const newUser = new User({ email, password: hashedPassword, role: role || "public" });
+        const newUser = new User({ email, password: hashedPassword, role: role || "teamMember" });
 
         const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
             expiresIn: "1800s"
@@ -71,7 +65,7 @@ exports.login = async(req, res, next) => {
         const validPassword = validatePassword(password, user.password);
         // console.log(validPassword);
         if (validPassword === false) return next(new Error('Password is not correct'))
-        if (user.role === 'public') return next(new Error('You cant login you are not team Member or admin'));
+
         const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1800s"
         });
@@ -151,7 +145,7 @@ exports.grantAccess = function(action, resource) {
             }
         }
     }
-    // to understand the above functionality
+    // to understand the above functionality (role based functionality)
     //const ac = new AccessControl();
     //       ac.grant('user')                    // define new or modify existing role. also takes an array.
     //           .createOwn('video')             // equivalent to .createOwn('video', ['*'])

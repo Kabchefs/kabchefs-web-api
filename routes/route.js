@@ -27,4 +27,6 @@ router.delete('/article/:articleId', userController.allowIfLoggedin, userControl
 
 router.post('/article', userController.allowIfLoggedin, userController.grantAccess('createAny', 'article'), articleController.createArticle);
 
+
+
 module.exports = router;
