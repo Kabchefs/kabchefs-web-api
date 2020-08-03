@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Article = require('../models/articleModel');
+const Article = require('../models/modal_schema');
 const jwt = require('jsonwebtoken');
 const { roles } = require('../roles');
 
