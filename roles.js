@@ -27,6 +27,7 @@ exports.roles = (function() {
         .createAny('project')
         .updateAny('project')
         .readAny('project')
+        .deleteAny('project')
 
 
     return ac;
