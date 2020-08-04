@@ -3,19 +3,40 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const path = require('path')
-const User = require('./models/userModel')
-const routes = require('./routes/route.js');
+const User = require('./models/user')
+const userRoutes = require('./routes/user.js');
 
 require("dotenv").config({
     path: path.join(__dirname, "../.env")
 });
 
 const app = express();
+//Firebase storage
+const Firebase=require('firebase-admin');
+const firesdk={
+  type: "service_account",
+  project_id: process.env.project_id,
+  private_key_id: process.env.private_key_id,
+  private_key: process.env.private_key.replace(/\\n/g, '\n'),
+  client_email: process.env.client_email,
+  client_id: process.env.client_id,
+  auth_uri: process.env.auth_uri,
+  token_uri: process.env.token_uri,
+  auth_provider_x509_cert_url: process.env.auth_provider_x509_cert_url,
+  client_x509_cert_url: process.env.client_x509_cert_url
+}
 
+// var serviceAccount = require('./firebasesdk.json');
+Firebase.initializeApp({
+    credential: Firebase.credential.cert(JSON.parse(JSON.stringify(firesdk))),
+    storageBucket: process.env.storageBucket
+  });
+//DATABASE
 const PORT = process.env.PORT || 3000;
+const dbString = process.env.DATABASE;
 
 mongoose
-    .connect('mongodb://localhost:27017/kabchefSignin', { useUnifiedTopology: true, useNewUrlParser: true })
+    .connect(dbString, { useUnifiedTopology: true, useNewUrlParser: true })
     .then(() => {
         console.log('Connected to the Database successfully');
     });
@@ -37,7 +58,8 @@ app.use(async(req, res, next) => {
     }
 });
 
-app.use('/', routes);
+app.use('/api/v1', userRoutes);
+
 app.listen(PORT, () => {
     console.log('Server is listening on Port:', PORT)
 })

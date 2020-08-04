@@ -1,7 +1,8 @@
-const User = require('../models/userModel');
+const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { roles } = require('../roles')
+const { roles } = require('../roles');
+const shortid=require('shortid');
 
 async function hashPassword(password) {
     return await bcrypt.hash(password, 10);
@@ -24,7 +25,7 @@ exports.signup = async(req, res, next) => {
         res.json({
             data: newUser,
             accessToken
-        })
+        });
     } catch (error) {
         next(error)
     }
@@ -74,7 +75,15 @@ exports.getUser = async(req, res, next) => {
 
 exports.updateUser = async(req, res, next) => {
     try {
-        const update = req.body
+        let file = req.file;
+        if(!file) {
+          res.status(400);
+          res.json('file not found');
+          return;
+        }
+        let extname=file.originalname.split('.')[1];
+        req.body.image=shortid()+"."+extname;
+        update = JSON.parse(JSON.stringify(req.body));
         const userId = req.params.userId;
         await User.findByIdAndUpdate(userId, update);
         const user = await User.findById(userId)
@@ -82,6 +91,18 @@ exports.updateUser = async(req, res, next) => {
             data: user,
             message: 'User has been updated'
         });
+
+        let fileUpload = req.bucket.file(req.body.image);
+        fileUpload.save(new Buffer(file.buffer)).then(  
+          result => {
+            console.log("file uploaded sucessfully");
+          },
+          error => {
+            res.status(500);
+            console.log(error);
+            res.json({error: error});
+          }
+        );
     } catch (error) {
         next(error)
     }
