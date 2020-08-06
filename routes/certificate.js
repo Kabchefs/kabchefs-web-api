@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user');
+const certiController = require('../controllers/certificates');
 //Firebase storage
 const Firebase = require('firebase-admin');
 const Multer = require('multer');
@@ -28,12 +29,10 @@ const multer = Multer({
 
 
 
-router.get('/users/:userId', userController.allowIfLoggedin, userController.getUser);
+router.get('/certificates', userController.allowIfLoggedin, userController.grantAccess('readAny', 'certificate'), certiController.getCertificates);
 
-router.get('/users', userController.allowIfLoggedin, userController.grantAccess('readAny', 'profile'), userController.getUsers);
+router.put('/certificates/:certiId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'certificate'), certiController.getCertificate);
 
-router.put('/users/:userId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'profile'), multer.single("file"), userController.updateUser);
-
-router.delete('/users/:userId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'profile'), userController.deleteUser);
+router.post('/certificates', userController.allowIfLoggedin, userController.grantAccess('createAny', 'certificate'), multer.single("file"), certiController.postCertificate);
 
 module.exports = router;
