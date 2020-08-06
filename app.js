@@ -58,8 +58,8 @@ app.use(async(req, res, next) => {
     }
 });
 
-app.use('/api/v1', userRoutes);
+app.use('/api/v1', routes);
 
 app.listen(PORT, () => {
-    console.log('Server is listening on Port:', PORT)
+    console.log('Server is listening on Port:', PORT);
 })
