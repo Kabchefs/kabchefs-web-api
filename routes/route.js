@@ -16,3 +16,5 @@ router.use('./articles', articleRoute);
 router.use('./certificates', certificateRoute);
 router.use('./projects', projectRoute);
 router.use('./submit_projects', userRoute);
+
+module.exports=router;

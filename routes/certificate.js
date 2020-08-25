@@ -9,7 +9,7 @@ const Multer = require('multer');
 
 var bucket = Firebase.storage().bucket();
 
-route.use(function(req, res, next) {
+router.use(function(req, res, next) {
     if (!req.Firebase) {
         req.Firebase = Firebase;
     }

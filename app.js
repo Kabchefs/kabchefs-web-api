@@ -4,12 +4,12 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const path = require('path')
 const User = require('./models/user')
-const routes = require('./routes/route');
+// const routes = ;
 
-require("dotenv").config({
-    path: path.join(__dirname, "../.env")
-});
-
+// require("dotenv").config({
+//     path: path.join(__dirname, "../.env")
+// });
+require("dotenv").config();
 const app = express();
 //Firebase storage
 const Firebase = require('firebase-admin');
@@ -58,7 +58,7 @@ app.use(async(req, res, next) => {
     }
 });
 
-app.use('/api/v1', routes);
+app.use('/api/v1', require('./routes/route'));
 
 app.listen(PORT, () => {
     console.log('Server is listening on Port:', PORT);
