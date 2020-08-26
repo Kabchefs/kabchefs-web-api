@@ -9,7 +9,7 @@ const Multer = require('multer');
 
 var bucket = Firebase.storage().bucket();
 
-route.use(function(req, res, next) {
+router.use(function(req, res, next) {
     if (!req.Firebase) {
         req.Firebase = Firebase;
     }
@@ -29,14 +29,14 @@ const multer = Multer({
 
 
 
-router.get('/projects', userController.allowIfLoggedin, userController.grantAccess('readAny', 'project'), projectConrtoller.getProjects);
+router.get('/projects', userController.allowIfLoggedin, userController.grantAccess('readAny', 'project'), projectController.getProjects);
 
-router.get('/projects/:projectId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'project'), projectConrtoller.getProject);
+router.get('/projects/:projectId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'project'), projectController.getProject);
 
-router.post('/projects', userController.allowIfLoggedin, userController.grantAccess('createAny', 'project'), multer.single("file"), projectConrtoller.postProject);
+router.post('/projects', userController.allowIfLoggedin, userController.grantAccess('createAny', 'project'), multer.single("file"), projectController.postProject);
 
-router.put('/projects/:projectId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'project'), projectConrtoller.updateProject);
+router.put('/projects/:projectId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'project'), projectController.updateProject);
 
-router.delete('/projects/:projectId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'project'), projectConrtoller.deleteProject);
+router.delete('/projects/:projectId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'project'), projectController.deleteProject);
 
 module.exports = router;

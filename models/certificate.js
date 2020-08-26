@@ -21,4 +21,4 @@ const certificateSchema = new Schema({
 // this is mongoose-sequence plugin  we have to add to automatically increasing the certiNumber field
 certificateSchema.plugin(AutoIncrement, { id: 'certiNumber_seq', inc_field: 'certiNumber' });
 
-exports.Certificate = new Mongoose.model('Certificate', certificateSchema);
+exports.Certificate = new mongoose.model('Certificate', certificateSchema);

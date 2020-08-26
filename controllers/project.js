@@ -41,7 +41,7 @@ exports.postProject = (req, res, next) => {
         let extname = file.originalname.split('.')[1];
         const image = shortid() + "." + extname;
 
-        const { title, description, link, image, status } = req.body;
+        const { title, description, link, status } = req.body;
         const newProject = new Project({ title, description, link, image: image, status })
         newProject.save((err, savedProject) => {
             if (err) {
@@ -73,6 +73,7 @@ exports.postProject = (req, res, next) => {
 
 
 }
+
 
 
 
