@@ -5,11 +5,16 @@ const Article = require('../models/articleModel');
 exports.createArticle = async(req, res, next) => {
     try {
         const user = res.locals.loggedInUser;
+        let status = false;
+        if (user.role === 'admin') {
+            status = true;
+        }
         const userId = user._id;
         const newArticle = new Article({
             title: req.body.title,
             content: req.body.content,
-            userId: userId
+            userId: userId,
+            flag: status
         });
         await newArticle.save();
         res.json({ data: newArticle });

@@ -74,21 +74,9 @@ exports.postProject = (req, res, next) => {
 
 }
 
-exports.updateProject = (req, res, next) => {
 
-    try {
-        const userId = req.params.userId;
-        const user = await User.findById(userId);
-        if (!user) return next(new Error('User does not exist'));
-        res.status(200).json({
-            data: user
-        });
-    } catch (error) {
-        next(error)
-    }
-}
 
-exports.updateUser = async(req, res, next) => {
+exports.updateProject = async(req, res, next) => {
     try {
         let file = req.file;
         if (!file) {

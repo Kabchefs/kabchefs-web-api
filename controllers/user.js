@@ -29,7 +29,7 @@ exports.signup = async(req, res, next) => {
 
         const { email, password, role } = req.body
         const hashedPassword = await hashPassword(password);
-        const newUser = new User({ email, password: hashedPassword, role: role || "public" });
+        const newUser = new User({ email, password: hashedPassword, role: role });
 
         const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
             expiresIn: "1800s"
@@ -110,7 +110,7 @@ exports.updateUser = async(req, res, next) => {
             message: 'User has been updated'
         });
 
-        //below code will update the file to firebase
+        //below code will upload the file to firebase
         let fileUpload = req.bucket.file(req.body.image);
         fileUpload.save(new Buffer(file.buffer)).then(
             result => {
@@ -144,6 +144,7 @@ exports.grantAccess = function(action, resource) {
     return async(req, res, next) => {
         try {
             const permission = roles.can(req.body.role)[action](resource);
+            //  roles.can(admin)(readAny)(article)
             if (!permission.granted) {
                 return res.status(401).json({
                     error: "You don't have enough permission to perform this action"
