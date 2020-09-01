@@ -5,22 +5,22 @@ const userController = require('../controllers/user');
 const articleController = require('../controllers/article');
 
 
-router.get('/articles/:articleId', articleController.getArticle);
+router.get('/:articleId', articleController.getArticle);
 
-router.get('/articles', articleController.getArticles);
-
-
-router.put('/articles/:articleId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'article'), articleController.updateArticle);
+router.get('/', articleController.getArticles);
 
 
-router.delete('/articles/:articleId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'article'), articleController.deleteArticle);
+router.put('/:articleId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'article'), articleController.updateArticle);
 
-router.post('/articles', userController.allowIfLoggedin, userController.grantAccess('createAny', 'article'), articleController.createArticle);
 
-router.get('/articles/posted', userController.allowIfLoggedin, userController.grantAccess('readAny', 'article'), articleController.getPostedArticles);
+router.delete('/:articleId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'article'), articleController.deleteArticle);
 
-router.get('/articles/posted/:articleId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'article'), articleController.getPostedArticle);
+router.post('/', userController.allowIfLoggedin, userController.grantAccess('createAny', 'article'), articleController.createArticle);
 
-router.delete('/articles/posted/:articleId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'article'), articleController.deleteArticle);
+router.get('/posted', userController.allowIfLoggedin, userController.grantAccess('readAny', 'article'), articleController.getPostedArticles);
+
+router.get('/posted/:articleId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'article'), articleController.getPostedArticle);
+
+router.delete('/posted/:articleId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'article'), articleController.deleteArticle);
 
 module.exports = router;

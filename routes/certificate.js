@@ -29,10 +29,10 @@ const multer = Multer({
 
 
 
-router.get('/certificates', userController.allowIfLoggedin, userController.grantAccess('readAny', 'certificate'), certiController.getCertificates);
+router.get('/', userController.allowIfLoggedin, userController.grantAccess('readAny', 'certificate'), certiController.getCertificates);
 
-router.put('/certificates/:certiId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'certificate'), certiController.getCertificate);
+router.put('/:certiId', userController.allowIfLoggedin, userController.grantAccess('readAny', 'certificate'), certiController.getCertificate);
 
-router.post('/certificates', userController.allowIfLoggedin, userController.grantAccess('createAny', 'certificate'), multer.single("file"), certiController.postCertificate);
+router.post('/', userController.allowIfLoggedin, userController.grantAccess('createAny', 'certificate'), multer.single("file"), certiController.postCertificate);
 
 module.exports = router;

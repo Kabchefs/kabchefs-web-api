@@ -9,12 +9,12 @@ const userController = require('../controllers/user');
 
 router.post('/login', userController.login);
 
-router.post('/signup', userController.grantAccess('createAny', 'user'), userController.signup);
+router.post('/signup', userController.signup);
 
-router.use('./users', userRoute);
-router.use('./articles', articleRoute);
-router.use('./certificates', certificateRoute);
-router.use('./projects', projectRoute);
-router.use('./submit_projects', userRoute);
+router.use('/users', userRoute);
+router.use('/articles', articleRoute);
+router.use('/certificates', certificateRoute);
+router.use('/projects', projectRoute);
+router.use('/submit_projects', userRoute);
 
-module.exports=router;
+module.exports = router;

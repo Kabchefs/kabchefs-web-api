@@ -1,7 +1,6 @@
 const Article = require('../models/article');
 
 
-
 exports.createArticle = async(req, res, next) => {
     try {
         const user = res.locals.loggedInUser;
@@ -24,17 +23,24 @@ exports.createArticle = async(req, res, next) => {
     }
 }
 
-exports.getArticles = async(req, res, next) => {
-    const articles = await Article.find({ flag: true });
-    res.status(200).json({
-        data: articles
-    });
-}
+exports.getArticles = (req, res, next) => {
+    Article.find({ flag: true }, (err, foundArticles) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("getArticle()");
+            res.status(200).json({
+                articles: foundArticles
+            })
+        }
+    })
 
+}
 exports.getArticle = async(req, res, next) => {
     try {
         const articleId = req.params.articleId;
-        const article = await User.findById(articleId);
+        const article = await Article.findById(articleId);
+
         if (!article) return next(new Error('Article does not exist'));
         res.status(200).json({
             data: article
@@ -82,7 +88,7 @@ exports.getPostedArticles = async(req, res, next) => {
 exports.getPostedArticle = async(req, res, next) => {
     try {
         const articleId = req.params.articleId;
-        const article = await User.findById(articleId);
+        const article = await Article.findById(articleId);
         if (!article) return next(new Error('Article does not exist'));
         res.status(200).json({
             data: article

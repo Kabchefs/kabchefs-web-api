@@ -5,43 +5,33 @@ const bcrypt = require('bcrypt');
 const { roles } = require('../roles');
 const shortid = require('shortid');
 
-async function hashPassword(password) {
-    const hashedPassword = await new Promise((resolve, reject) => {
-        bcrypt.hash(password, 10, function(err, hash) {
-            if (err) reject(err)
-            resolve(hash)
-        });
-    })
-
-    return hashedPassword
-}
 
 
-function validatePassword(plainPassword, hashedPassword) {
-
-    return bcrypt.compare(plainPassword, hashedPassword, (err, match) => {
-        return match
-    });
-}
-
-exports.signup = async(req, res, next) => {
+exports.signup = (req, res, next) => {
     try {
 
         const { email, password, role } = req.body
-        const hashedPassword = await hashPassword(password);
-        const newUser = new User({ email, password: hashedPassword, role: role });
 
-        const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-            expiresIn: "1800s"
+        bcrypt.hash(password, 10, function(err, hash) {
+            if (err) console.log(err);
+            else {
+                const newUser = new User({ email, password: hash, role: role });
+
+                const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+                    expiresIn: "1800s"
+                });
+
+                newUser.accessToken = accessToken;
+                newUser.save();
+                res.json({
+                    data: newUser,
+                    accessToken,
+                    message: "user is successfully signed up"
+                })
+            }
+
         });
 
-        newUser.accessToken = accessToken;
-        await newUser.save();
-        res.json({
-            data: newUser,
-            accessToken,
-            message: "user is successfully signed up"
-        })
 
     } catch (error) {
         next(error)
@@ -54,17 +44,30 @@ exports.login = async(req, res, next) => {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) return next(new Error('Email does not exist'));
-        const validPassword = validatePassword(password, user.password);
-        // console.log(validPassword);
-        if (validPassword === false) return next(new Error('Password is not correct'))
-        const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "1800s"
-        });
-        await User.findByIdAndUpdate(user._id, { accessToken })
-        res.status(200).json({
-            data: { email: user.email, role: user.role },
-            accessToken
-        })
+
+
+        bcrypt.compare(password, user.password)
+            .then((result) => {
+                if (result) {
+                    const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+                        expiresIn: "1800s"
+                    });
+                    User.findByIdAndUpdate(user._id, { accessToken })
+                    res.status(200).json({
+                        data: { email: user.email, role: user.role },
+                        accessToken
+                    })
+                } else {
+                    return next(new Error('Password is incorrect'))
+                }
+
+            }).catch((err) => {
+                console.log(err);
+            });
+
+
+
+
     } catch (error) {
         next(error);
     }
@@ -112,7 +115,7 @@ exports.updateUser = async(req, res, next) => {
 
         //below code will upload the file to firebase
         let fileUpload = req.bucket.file(req.body.image);
-        fileUpload.save(new Buffer(file.buffer)).then(
+        fileUpload.save(Buffer.from(file.buffer)).then(
             result => {
                 console.log("file uploaded sucessfully");
             },
@@ -121,7 +124,9 @@ exports.updateUser = async(req, res, next) => {
                 console.log(error);
                 res.json({ error: error });
             }
-        );
+        ).catch((err) => {
+            console.log(err);
+        })
     } catch (error) {
         next(error)
     }
@@ -144,7 +149,7 @@ exports.grantAccess = function(action, resource) {
     return async(req, res, next) => {
         try {
             const permission = roles.can(req.body.role)[action](resource);
-            //  roles.can(admin)(readAny)(article)
+
             if (!permission.granted) {
                 return res.status(401).json({
                     error: "You don't have enough permission to perform this action"

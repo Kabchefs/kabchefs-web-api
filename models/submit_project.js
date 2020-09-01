@@ -24,4 +24,5 @@ const submitProjectSchema = new Schema({
 
 })
 
-exports.SubmitProject = new mongoose.model('SubmitProject', submitProjectSchema);
+const SubmitProject = new mongoose.model('SubmitProject', submitProjectSchema);
+module.exports = SubmitProject;

@@ -28,12 +28,12 @@ const multer = Multer({
 
 
 
-router.get('/users/:userId', userController.allowIfLoggedin, userController.getUser);
+router.get('/', userController.allowIfLoggedin, userController.grantAccess('readAny', 'profile'), userController.getUsers);
 
-router.get('/users', userController.allowIfLoggedin, userController.grantAccess('readAny', 'profile'), userController.getUsers);
+router.get('/:userId', userController.allowIfLoggedin, userController.getUser);
 
-router.put('/users/:userId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'profile'), multer.single("file"), userController.updateUser);
+router.put('/:userId', userController.allowIfLoggedin, userController.grantAccess('updateAny', 'profile'), multer.single("file"), userController.updateUser);
 
-router.delete('/users/:userId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'profile'), userController.deleteUser);
+router.delete('/:userId', userController.allowIfLoggedin, userController.grantAccess('deleteAny', 'profile'), userController.deleteUser);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const Certificate = require('../models/certificate');
 const shortid = require('shortid');
+const mongoose = require('mongoose');
 
 
 exports.getCertificates = (req, res, next) => {
@@ -37,11 +38,12 @@ exports.postCertificate = (req, res, next) => {
             res.json('file not found');
             return;
         }
+        console.log("postcerti");
         let extname = file.originalname.split('.')[1];
         const image = shortid() + "." + extname;
 
-        const newCertificate = new Certtificate({
-            certiId: shortid(),
+        const newCertificate = new Certificate({
+            certiId: new mongoose.Types.ObjectId,
             image: image
         })
         newCertificate.save((err, savedCerti) => {
@@ -58,7 +60,7 @@ exports.postCertificate = (req, res, next) => {
 
         //below code will update the file to firebase
         let fileUpload = req.bucket.file(image);
-        fileUpload.save(new Buffer(file.buffer)).then(
+        fileUpload.save(Buffer.from(file.buffer)).then(
             result => {
                 console.log("file uploaded sucessfully");
             },
@@ -67,7 +69,9 @@ exports.postCertificate = (req, res, next) => {
                 console.log(error);
                 res.json({ error: error });
             }
-        );
+        ).catch((err) => {
+            console.log(err);
+        })
     } catch (error) {
         next(error)
     }

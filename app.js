@@ -36,9 +36,11 @@ const PORT = process.env.PORT || 3000;
 const dbString = process.env.DATABASE;
 
 mongoose
-    .connect(dbString, { useUnifiedTopology: true, useNewUrlParser: true })
+    .connect(dbString, { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false })
     .then(() => {
         console.log('Connected to the Database successfully');
+    }).catch((err) => {
+        console.log(err);
     });
 
 app.use(bodyParser.urlencoded({ extended: true }));
